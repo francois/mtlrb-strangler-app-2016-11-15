@@ -225,7 +225,7 @@ The two applications share a single address space: if one application tramples o
 both applications may crash. This also means that if one of the application crashes the process, both the legacy and the
 replacement application will be down. This may decrease your app's availability.
 
-You cannot use conflicting versions of dependencies. If the legacy application used Active Record 3, you will not be able
+You cannot use conflicting versions of dependencies. If the legacy application uses Active Record 3, you will not be able
 to use Active Record 4 or 5 in the replacement application.
 
 ### Pros of strangling using a reverse proxy
