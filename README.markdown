@@ -157,6 +157,7 @@ Rails app handle the requests. If that fails, we let **all** other requests fall
 As you strangle more and more of the application, you will add other routes **above** the legacy app, eventually removing the
 reference to the legacy application when you've migrated 100% of your application.
 
+You may want to read the official [Rails engine documentation](http://guides.rubyonrails.org/engines.html).
 
 ## Strangling by reverse proxying
 
