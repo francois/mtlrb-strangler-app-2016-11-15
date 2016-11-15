@@ -11,7 +11,7 @@ $legacy_nginx_conf_template = @(END)
 # This file is managed by Puppet
 # DO NOT EDIT!
 
-upstream legacy {
+upstream app {
   server 127.0.0.1:<%= @port %>;
 }
 
@@ -20,7 +20,7 @@ server {
   server_name <%= @ipaddress %>;
 
   location / {
-    proxy_pass http://legacy;
+    proxy_pass http://app;
   }
 }
 

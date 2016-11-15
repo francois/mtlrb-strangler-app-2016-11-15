@@ -1,12 +1,13 @@
 # Montreal.rb 2016-11-15 Strangler App Talk
 
-This repository is a companion to my talk on the Strangler App pattern that I will give on November 15th, 2016, at Montreal.rb.
+This repository is a companion to my talk on the Strangler App pattern that I gave on November 15th, 2016, at Montreal.rb.
 
-## Usage
+## First steps
 
 ```sh
 vagrant up
 vagrant ssh
+cd /vagrant
 ```
 
 ## The Strangler Pattern
@@ -17,12 +18,12 @@ parts of your application, until the application has been completely replaced.
 
 In the context of web applications, we already have a way to address parts of the application: the URL. We can replace portions of the address space of
 our application by replacing selective URLs with a new version. Eventually, you will have replaced most of the functionality of your application, and
-you can simply stop serving the old application.
+you can simply stop serving the legacy application.
 
 In this repository, you will find two methods to strangle your app:
 
-* Strangling by mounting the legacy app as a Rails engine
-* Strangling using a reverse proxy
+* [Strangling by mounting the legacy app as a Rails engine](#strangling-by-mounting-the-legacy-app-as-a-rails-engine)
+* [Strangling using a reverse proxy](#strangling-by-reverse-proxying)
 
 
 ## Strangling by mounting the legacy app as a Rails engine
@@ -49,7 +50,13 @@ Gem::Specification.new do |spec|
   # ...
 
   # CRITICAL: make sure you require the correct version of Sinatra
+  # CRITICAL: if you are strangling a Rails application, you MUST use the same Rails version
+  #           this may be undesired, in which case you will have to use the reverse proxy version of the strangler pattern
   spec.add_dependency "sinatra", ">= 2.0.0.beta2"
+
+  # You must also migrate all other dependencies in the gemspec
+  # spec.add_dependency "sequel"
+  # spec.add_dependency "redis"
 
   spec.add_development_dependency "bundler", "~> 1.12"
   spec.add_development_dependency "rake", "~> 10.0"
@@ -65,7 +72,14 @@ source "https://rubygems.org"
 gemspec
 ```
 
-Finally, run `bundle install` and make sure all dependencies are correctly loaded.
+During the creation of the gemspec, you must migrate all dependencies of your application to the gemspec.
+This is required to enable Bundler to take the correct decisions as to what versions of dependencies to use
+for both applications. If Bundler is unable to resolve the gemspecs, if you have conflicts, you will have to
+use the reverse proxy version of the strangler application pattern.
+
+After you migrated the dependencies, run `bundle install` and make sure all dependencies are correctly resolved.
+It would also be a good idea to run any tests you have, as well a make a manual run-through of your application,
+to ensure the dependencies are correctly migrated.
 
 ### Reference the legacy gem from a fresh Rails application
 
@@ -85,13 +99,14 @@ gem 'rails', '~> 5.0.0', '>= 5.0.0.1'
 ```
 
 ### Mount the legacy app **inside** the Rails application URL space
+
 Next, you want to require and mount your application within the Rails URL space:
 
 ```ruby
 # config/routes.rb
-# This works because both applications live on the same filesystem, with known locations
-# If you are deploying using a Gem, you will have to change your legacy app to be more
-# like a Gem, where you can load the app using a simple require directive
+# require_dependency works because both applications live on the same filesystem, with
+# known locations. If you are deploying using a Gem, you will have to change your legacy
+# app to be more like a Gem, where you can load the app using a regular require directive.
 require_relative '../../legacy/app'
 
 Rails.application.routes.draw do
@@ -99,11 +114,13 @@ Rails.application.routes.draw do
 end
 ```
 
-At this point, if you boot your Rails application and hit the root URL, you should see the legacy application's home page.
+At this point, if you boot your Rails application and hit the root URL, you should see the legacy application's
+home page. Again, if you run through your application, you should not notice any changes: all requests are
+routed to the legacy application.
 
 ### Strangling report generation with a Rails engine
 
-Our task today is to strangle the reporting section. Maybe there is a new backend, or the schema was optimized. In order
+Our task today is to replace the reporting section. Maybe there is a new backend, or the schema was optimized. In order
 to do that, we have to remember that Rails executes `config/routes.rb` in order: the first URL that matches will be served
 first. Since this version only wants to replace the `/report` URL and below, we must tell Rails that the legacy application
 will handle anything that the Rails router hasn't already handled.
@@ -124,6 +141,9 @@ require_relative '../../legacy/app'
 
 Rails.application.routes.draw do
   get '/report(/:id)', to: 'reports#show'
+
+  # Keep this line last, as this will handle anything
+  # that is not explicitly handled by the Rails application
   mount Sinatra::Application, at: "/"
 end
 ```
@@ -140,7 +160,7 @@ reference to the legacy application when you've migrated 100% of your applicatio
 
 ## Strangling by reverse proxying
 
-This technique boils down to using Nginx (or any reverse proxying HTTP server) to route requests to one or more applications.
+This technique boils down to using Nginx (or any reverse proxying HTTP server) to route requests to two or more applications.
 Initially, we have only one application, and we reverse proxy into the legacy application:
 
 ```
@@ -207,6 +227,9 @@ process itself, but also any models and constants. In memory constrained scenari
 The two applications share a single address space: if one application tramples over the data structures of the other one,
 both applications may crash. This also means that if one of the application crashes the process, both the legacy and the
 replacement application will be down. This may decrease your app's availability.
+
+You cannot use conflicting versions of dependencies. If the legacy application used Active Record 3, you will not be able
+to use Active Record 4 or 5 in the replacement application.
 
 ### Pros of strangling using a reverse proxy
 
