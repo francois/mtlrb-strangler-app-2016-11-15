@@ -78,7 +78,7 @@ for both applications. If Bundler is unable to resolve the gemspecs, if you have
 use the reverse proxy version of the strangler application pattern.
 
 After you migrated the dependencies, run `bundle install` and make sure all dependencies are correctly resolved.
-It would also be a good idea to run any tests you have, as well a make a manual run-through of your application,
+It would also be a good idea to run any tests you have, as well as make a manual run-through of your application,
 to ensure the dependencies are correctly migrated.
 
 ### Reference the legacy gem from a fresh Rails application
@@ -170,7 +170,6 @@ upstream app {
 
 server {
   listen 80 default;
-  server_name 10.0.2.15;
 
   location / {
     proxy_pass http://app;
@@ -179,11 +178,10 @@ server {
 
 ```
 
-This block routes any HTTP requests on port 80 to `127.0.0.1:4000`. We now want to route a portion of the URL space to the
-replacement application. We first start by building a new app, and testing it in isolation.
-
-We will now have two applications: the legacy application and it's replacement. Both apps are **unaware** of each other.
-They share no code. The Nginx configuration will now become:
+This block proxies any HTTP requests on port 80 to `127.0.0.1:4000`. We now want to route a portion of the URL space to the
+replacement application. We first start by building a new app, and test it in isolation. We will now have two applications:
+the legacy application and it's replacement. Both apps are **unaware** of each other. They share no code. The Nginx
+configuration will now become:
 
 ```
 upstream legacy {
@@ -196,7 +194,6 @@ upstream replacement {
 
 server {
   listen 80 default;
-  server_name 10.0.2.15;
 
   location /report {
     proxy_pass http://replacement;
@@ -210,7 +207,7 @@ server {
 ```
 
 This configuration tells Nginx to route any URL that **starts with** `/report` to `127.0.0.1:4001` and route any other URL
-to `127.0.0.1:4000`.
+to `127.0.0.1:4000`. Here too order is significate: Nginx interprets this block as a program.
 
 
 ## Evaluation
