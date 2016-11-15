@@ -217,7 +217,7 @@ As with anything, there are pros and cons to each technique:
 ### Pros of strangling inside a Rails app
 
 The two applications share a single address space: all code is shared between the two applications. This means the Ruby
-process itself, but also any models and constants. In memory constrained scenarios, this might be advantageous.
+process itself, but also any models and constants. In memory constrained scenarios, this may be advantageous.
 
 ### Cons of strangling inside a Rails app
 
@@ -239,4 +239,4 @@ the limit!
 ### Cons of strangling using a reverse proxy
 
 There are now two applications running. Both consume resources: memory, database connections, etc. In resource constrained
-scenarios, this might be a problem.
+scenarios, this may be a problem.
