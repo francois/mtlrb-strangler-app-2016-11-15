@@ -6,6 +6,7 @@ package{[
   'bundler',
   'byobu',
   'git',
+  'htop',
   'libreadline-dev',
   'ruby',
   'vim-nox',
