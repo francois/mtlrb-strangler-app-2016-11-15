@@ -10,6 +10,7 @@ package{[
   'ruby',
   'vim-nox',
   'wget',
+  'zlib1g-dev',
   'zsh',
 ]:
   ensure => latest,
