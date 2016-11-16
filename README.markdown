@@ -12,7 +12,7 @@ cd /vagrant
 
 ## The Strangler Pattern
 
-The [Strangler Pattern](http://martinfowler.com/bliki/StranglerApplication.html) is a pattern that enables you to selectively replace parts of your app.
+The [Strangler Pattern](http://martinfowler.com/bliki/StranglerApplication.html) is a pattern that enables you to selectively rewrite parts of your app.
 Instead of scheduling a [big-bang rewrite (which almost never works)](http://www.joelonsoftware.com/articles/fog0000000069.html), you selectively replace
 parts of your application, until the application has been completely replaced.
 
