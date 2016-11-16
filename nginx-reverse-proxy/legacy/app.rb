@@ -9,5 +9,6 @@ get "/" do
 end
 
 get "/report" do
+  sleep 6
   "Report, from Legacy"
 end
